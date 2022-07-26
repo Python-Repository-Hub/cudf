@@ -11,9 +11,10 @@ jobs:
     with:
       package-name: cudf
       package-dir: python/cudf
+      cibw-environment: "PYTHON_PACKAGE_CUDA_SUFFIX='-cuda11'"
       cibw-before-all: "dnf install -y openssl-devel rapidjson-devel libzstd-devel lz4-devel lz4-libs protobuf-devel && tar -xf /opt/_internal/static-libs-for-embedding-only.tar.xz -C /opt/_internal"
-      cibw-before-build: "pip install rmm-cuda11 --index-url https://pypi.k8s.rapids.ai/simple && pip install pyarrow==8.0.0 && export PYARROW_PYPI_DIR=$(python3 -c 'import pyarrow, os; print(os.path.dirname(pyarrow.__file__))')"
-      skbuild-configure-options: "-DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DArrow_DIR=\"${PYARROW_PYPI_DIR}\""
+      cibw-before-build: "pip install rmm-cuda11 --index-url https://pypi.k8s.rapids.ai/simple && pip install pyarrow==8.0.0 && ln -snf $(python3 -c 'import pyarrow, os; print(os.path.dirname(pyarrow.__file__))') /pyarrow"
+      skbuild-configure-options: "-DCMAKE_MESSAGE_LOG_LEVEL=DEBUG -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DArrow_DIR=/pyarrow"
       manylinux-platform: manylinux_2_17
       cpu-smoketest-command: "python3 -c 'import cudf; print(cudf)'"
       gpu-smoketest-command: ""
